@@ -1,0 +1,117 @@
+-- // Fishing God Mode - Rayfield UI
+-- Chỉ dịch chuyển theo tọa độ (Đã xóa phần load NPC)
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Fishing Million Script [Alpha]",
+    LoadingTitle = "Loading...",
+    LoadingSubtitle = "By Creator👑",
+    ConfigurationSaving = { Enabled = false },
+})
+
+local player = game.Players.LocalPlayer
+local Event = game:GetService("ReplicatedStorage"):WaitForChild("Event")
+local RodFolder = game:GetService("ReplicatedStorage"):WaitForChild("Rod")
+
+-- Tọa độ dịch chuyển của từng NPC
+local npcPositions = {
+    ["Cơ Nhất Thiên Lấy Special Balt"] = CFrame.new(920.164856, 27.3165092, -13195.0449, 0, 0, 1, 0, 1, -0, -1, 0, 0),
+    ["Cii lấy Thái Cực Điếu Pháp"] = CFrame.new(1045.24048, 47.3168793, -13044.7383, 0.98689729, -0.0510997698, 0.153044298, 2.53617764e-05, 0.948574245, 0.316554785, -0.161349759, -0.312403202, 0.936146617),
+    ["nick331k4ml lấy Dịch Kinh Thập Nhị Điếu"] = CFrame.new(-185.386536, 103.464058, -18656.0469, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+    ["CharacterSecretLong lấy Hắc Long Thập Bát Điếu"] = CFrame.new(-10.6036491, 34.962162, 59.0878448, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+    ["babyboyofman1998 lấy Thuần Dương Điếu Pháp"] = CFrame.new(95.2527466, 36.1048241, -148.897934, 1, 0, 0, 0, 0.95665127, -0.291235954, 0, 0.291235954, 0.95665127),
+}
+
+-- =============================================
+-- HÀM DỊCH CHUYỂN THEO TỌA ĐỘ
+-- =============================================
+local function TeleportToNPC(name)
+    local cframe = npcPositions[name]
+    if not cframe then return end
+    
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if root then
+        root.CFrame = cframe
+        Rayfield:Notify({
+            Title = "Dịch Chuyển",
+            Content = "Đã teleport tới: " .. name,
+            Duration = 3,
+        })
+    end
+end
+
+-- =============================================
+-- TAB 1: MUA CẦN CÂU
+-- =============================================
+local Tab1 = Window:CreateTab("Mua Cần Câu", 4483362458)
+Tab1:CreateSection("Mua Cần Câu")
+
+for _, rod in pairs(RodFolder:GetChildren()) do
+    if rod:IsA("Tool") or rod:IsA("Model") or rod:IsA("Folder") then
+        Tab1:CreateButton({
+            Name = rod.Name,
+            Callback = function()
+                Event.BuyRodEvent:FireServer(rod, 1)
+                Rayfield:Notify({Title = "Mua Cần", Content = rod.Name, Duration = 2})
+            end,
+        })
+    end
+end
+
+-- =============================================
+-- TAB 2: DỊCH CHUYỂN NPC
+-- =============================================
+local Tab2 = Window:CreateTab("Dịch Chuyển NPC", 6026568198)
+Tab2:CreateSection("Dịch Chuyển Theo Tọa Độ")
+
+local npcs = {
+    "Cơ Nhất Thiên Lấy Special Balt",
+    "Cii lấy Thái Cực Điếu Pháp",
+    "nick331k4ml lấy Dịch Kinh Thập Nhị Điếu",
+    "CharacterSecretLong lấy Hắc Long Thập Bát Điếu",
+    "babyboyofman1998 lấy Thuần Dương Điếu Pháp"
+}
+
+for _, name in ipairs(npcs) do
+    Tab2:CreateButton({
+        Name = "→ " .. name,
+        Callback = function()
+            TeleportToNPC(name)
+        end,
+    })
+end
+
+-- =============================================
+-- TAB 3: BÁN CÁ
+-- =============================================
+local Tab3 = Window:CreateTab("Bán Cá", 6023426915)
+Tab3:CreateButton({
+    Name = "Bán Hết Tất Cả Cá",
+    Callback = function()
+        Event.SellFishEvent:FireServer()
+        Rayfield:Notify({Title = "Bán Cá", Content = "Đã bán hết!", Duration = 3})
+    end,
+})
+
+-- =============================================
+-- TAB 4: TP MAP
+-- =============================================
+local Tab4 = Window:CreateTab("TP Map", 4483362458)
+Tab4:CreateSection("Chọn Map")
+
+for i = 1, 11 do
+    Tab4:CreateButton({
+        Name = "Map " .. i,
+        Callback = function()
+            Event.ChangeMapEvent:FireServer(i)
+            Rayfield:Notify({Title = "TP Map", Content = "Chuyển tới Map " .. i, Duration = 3})
+        end,
+    })
+end
+
+Rayfield:Notify({
+    Title = "UI Loaded",
+    Content = "Đã Khởi Động Thành Công Script⚡",
+    Duration = 5,
+})

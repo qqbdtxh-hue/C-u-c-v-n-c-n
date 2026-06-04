@@ -1,0 +1,180 @@
+-- // Fishing Million Script [Alpha] - Rayfield UI
+-- Auto Rod + Nhiều NPC Mới + Map Tự Động
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Fishing Million Script [Alpha]",
+    LoadingTitle = "Loading...",
+    LoadingSubtitle = "By Creator👑",
+    ConfigurationSaving = { Enabled = false },
+})
+
+local player = game.Players.LocalPlayer
+local Event = game:GetService("ReplicatedStorage"):WaitForChild("Event")
+local RodFolder = game:GetService("ReplicatedStorage"):WaitForChild("Rod")
+local MapFolder = workspace:WaitForChild("Map")
+
+local AutoRodEnabled = false
+local AutoRodLoop = nil
+
+-- =============================================
+-- TỌA ĐỘ NPC (Cũ + Mới)
+-- =============================================
+local npcPositions = {
+    ["Cơ Nhất Thiên Lấy Special Balt"] = CFrame.new(920.164856, 27.3165092, -13195.0449, 0, 0, 1, 0, 1, -0, -1, 0, 0),
+    ["Cii lấy Thái Cực Điếu Pháp"] = CFrame.new(1045.24048, 47.3168793, -13044.7383, 0.98689729, -0.0510997698, 0.153044298, 2.53617764e-05, 0.948574245, 0.316554785, -0.161349759, -0.312403202, 0.936146617),
+    ["nick331k4ml lấy Dịch Kinh Thập Nhị Điếu"] = CFrame.new(-185.386536, 103.464058, -18656.0469, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+    ["ns5q5u Lấy Cấm Kỵ Điếu Pháp"] = CFrame.new(-14.3292389, 35.5106087, 53.3451958, 0.457574606, -0.281386137, 0.843473434, -3.13967466e-05, 0.948601127, 0.316474199, -0.889171243, -0.144837022, 0.434046984),
+    ["babyboyofman1998 lấy Thuần Dương Điếu Pháp"] = CFrame.new(46.9793816, 64.9048615, -75.6301117, 0.97204423, -0.0477527827, 0.229890555, 0.0683596432, 0.994242072, -0.0825208798, -0.224626243, 0.0959291831, 0.969711602),
+    ["Hien5ccc Lấy Lục Mạch Thần Điếu"] = CFrame.new(108.87339, 32.3300896, -21074.5879, -0.713147759, -0.0844456553, -0.695908904, 0.0993357599, 0.970527291, -0.219565943, 0.693939924, -0.225711599, -0.683740854),
+    
+    -- NPC MỚI
+    ["Photuyoru Lấy Điếu Pháp Tăng Thiên Quốc"] = CFrame.new(55.7863388, 35.8780518, -5387.23535, -1.55330599e-05, 0.148344368, -0.988935769, 0.0106975203, -0.988879144, -0.148336053, -0.999942839, -0.0105814645, -0.00157155655),
+    ["Prime Noobies Triệu Hồi Cá True Form Demo Fish"] = CFrame.new(-232.394348, 104.319763, -15746.8633, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+    ["Willer Johnathan Lấy Tiềm Long Điếu Pháp"] = CFrame.new(-35.8871574, 113.393326, -15692.3594, -1.00000024, 0, 0, 0, 0.866810441, -0.498637825, -0, -0.498637825, -0.86681056),
+    ["Ngô Bất Nhân Lấy Trường Sinh Điếu Pháp"] = CFrame.new(198.776291, 83.0543747, 6399.0835, 3.09348106e-05, -0.296906471, -0.954906523, 4.69386578e-06, 0.954906583, -0.296906471, 0.99999994, 4.69386578e-06, 3.09348106e-05),
+    ["Sử Lương Hồ Lấy Định Hải Thần Điếu"] = CFrame.new(197.827087, 102.529549, 2813.42236, 2.12192535e-05, 0.998822212, -0.0485193431, 2.01761723e-05, -0.0485193729, -0.998822212, -1, 2.01761723e-05, -2.12192535e-05),
+    ["Guy Lấy Ngũ Sát Điếu Pháp"] = CFrame.new(-56.0283203, 71.2409897, -2348.10229, 0, 0, 1, 0, 1, -0, -1, 0, 0),
+    ["Điếu Thứ Bất Lấy Đăng Tiên Thập Điếu"] = CFrame.new(116.356537, 74.3887329, -2647.85034, 1, 0, 0, 0, 0.996032, -0.0889959037, 0, 0.0889959037, 0.996032),
+    ["khoa_2011ko Lấy Thất Thương Điếu Pháp"] = CFrame.new(167.838425, 62.4038811, -21392.125, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+    ["cii_qo1471 Lấy Bắc Minh Điếu Pháp"] = CFrame.new(-418.717712, 29.5103493, -21022.9199, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+    ["Photuyoru Lấy Thục Đạo Sơn Điếu Pháp"] = CFrame.new(118.056274, 41.2805748, -7558.40918, 0, 0, 1, 0, 1, -0, -1, 0, 0),
+    ["ManaPotionSeller Mua Phục Hồi Mana"] = CFrame.new(98.3296432, 37.9665451, -6.5157094, -0.942865491, 0, -0.333173633, 0, 1, 0, 0.333173633, 0, -0.942865491),
+    ["NPC secret Lấy Độc Cô Cửu Điếu"] = CFrame.new(160.157608, 50.7864532, -92.6125793, 0, 0, -1, 0, 1, 0, 1, 0, 0),
+    ["CharacterSecretLong lấy Hắc Long Thập Bát Điếu"] = CFrame.new(9.39635086, 34.962162, -103.912155, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+}
+
+local function TeleportToNPC(name)
+    local cframe = npcPositions[name]
+    if not cframe then 
+        Rayfield:Notify({Title = "Lỗi", Content = "Không tìm thấy tọa độ của: " .. name, Duration = 3})
+        return 
+    end
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if root then
+        root.CFrame = cframe
+        Rayfield:Notify({Title = "Dịch Chuyển", Content = "Đã đến: " .. name, Duration = 3})
+    end
+end
+
+-- =============================================
+-- AUTO ROD
+-- =============================================
+local function StartAutoRod()
+    if AutoRodLoop then return end
+    AutoRodLoop = task.spawn(function()
+        while AutoRodEnabled do
+            Event.PullFishEvent:FireServer(65, 200)
+            task.wait(0.1)
+        end
+    end)
+end
+
+local function StopAutoRod()
+    AutoRodEnabled = false
+    if AutoRodLoop then
+        task.cancel(AutoRodLoop)
+        AutoRodLoop = nil
+    end
+end
+
+-- =============================================
+-- TẠO UI
+-- =============================================
+local Tab1 = Window:CreateTab("Mua Cần Câu", 4483362458)
+Tab1:CreateSection("Danh sách cần câu (Bạn Chỉ Cần 1 Money)")
+for _, rod in pairs(RodFolder:GetChildren()) do
+    if rod:IsA("Tool") or rod:IsA("Model") or rod:IsA("Folder") then
+        Tab1:CreateButton({
+            Name = rod.Name,
+            Callback = function()
+                Event.BuyRodEvent:FireServer(rod, 1)
+                Rayfield:Notify({Title = "Mua Cần", Content = rod.Name, Duration = 2})
+            end,
+        })
+    end
+end
+
+local TabAuto = Window:CreateTab("Auto Rod", 4483362458)
+TabAuto:CreateSection("Auto Câu Cá")
+TabAuto:CreateToggle({
+    Name = "Bật/Tắt Auto Rod",
+    CurrentValue = false,
+    Flag = "AutoRodToggle",
+    Callback = function(Value)
+        AutoRodEnabled = Value
+        if Value then
+            StartAutoRod()
+            Rayfield:Notify({Title = "Auto Rod", Content = "Đã BẬT Auto Rod (65/200)", Duration = 4})
+        else
+            StopAutoRod()
+            Rayfield:Notify({Title = "Auto Rod", Content = "Đã TẮT Auto Rod", Duration = 4})
+        end
+    end,
+})
+
+local Tab2 = Window:CreateTab("Dịch Chuyển NPC", 6026568198)
+Tab2:CreateSection("Danh sách NPC (Click để dịch chuyển)")
+
+local npcs = {
+    "Cơ Nhất Thiên Lấy Special Balt",
+    "Cii lấy Thái Cực Điếu Pháp",
+    "nick331k4ml lấy Dịch Kinh Thập Nhị Điếu",
+    "ns5q5u Lấy Cấm Kỵ Điếu Pháp",
+    "babyboyofman1998 lấy Thuần Dương Điếu Pháp",
+    "Hien5ccc Lấy Lục Mạch Thần Điếu",
+    "Photuyoru Lấy Điếu Pháp Tăng Thiên Quốc",
+    "Prime Noobies Triệu Hồi Cá True Form Demo Fish",
+    "Willer Johnathan Lấy Tiềm Long Điếu Pháp",
+    "Ngô Bất Nhân Lấy Trường Sinh Điếu Pháp",
+    "Sử Lương Hồ Lấy Định Hải Thần Điếu",
+    "Guy Lấy Ngũ Sát Điếu Pháp",
+    "Điếu Thứ Bất Lấy Đăng Tiên Thập Điếu",
+    "khoa_2011ko Lấy Thất Thương Điếu Pháp",
+    "cii_qo1471 Lấy Bắc Minh Điếu Pháp",
+    "Photuyoru Lấy Thục Đạo Sơn Điếu Pháp",
+    "ManaPotionSeller Mua Phục Hồi Mana",
+    "NPC secret Lấy Độc Cô Cửu Điếu",
+    "CharacterSecretLong lấy Hắc Long Thập Bát Điếu"
+}
+
+for _, name in ipairs(npcs) do
+    Tab2:CreateButton({
+        Name = "→ " .. name,
+        Callback = function()
+            TeleportToNPC(name)
+        end,
+    })
+end
+
+local Tab3 = Window:CreateTab("Bán Cá", 6023426915)
+Tab3:CreateButton({
+    Name = "Bán Hết Tất Cả Cá",
+    Callback = function()
+        Event.SellFishEvent:FireServer()
+        Rayfield:Notify({Title = "Bán Cá", Content = "Đã bán hết!", Duration = 3})
+    end,
+})
+
+local Tab4 = Window:CreateTab("TP Map", 4483362458)
+Tab4:CreateSection("Danh sách Map")
+
+for _, map in pairs(MapFolder:GetChildren()) do
+    local mapNumber = tonumber(map.Name:match("%d+"))
+    if mapNumber then
+        Tab4:CreateButton({
+            Name = "Map " .. mapNumber,
+            Callback = function()
+                Event.ChangeMapEvent:FireServer(mapNumber)
+                Rayfield:Notify({Title = "TP Map", Content = "Đã chuyển tới Map " .. mapNumber, Duration = 3})
+            end,
+        })
+    end
+end
+
+Rayfield:Notify({
+    Title = "UI Loaded",
+    Content = "Đã Khởi Động Script Thành Công⚡",
+    Duration = 6,
+})

@@ -1,10 +1,10 @@
--- // Fishing Million Script [Alpha] - Rayfield UI
+-- // Fishing Million Pounds - Rayfield UI
 -- Auto Rod + Nhiều NPC Mới + Map Tự Động
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Fishing Million Script [Alpha]",
+    Name = "Fishing Million Pounds",
     LoadingTitle = "Loading...",
     LoadingSubtitle = "By Creator👑",
     ConfigurationSaving = { Enabled = false },
@@ -44,6 +44,7 @@ local npcPositions = {
     ["NPC secret Lấy Độc Cô Cửu Điếu"] = CFrame.new(160.157608, 50.7864532, -92.6125793, 0, 0, -1, 0, 1, 0, 1, 0, 0),
     ["CharacterSecretLong lấy Hắc Long Thập Bát Điếu"] = CFrame.new(9.39635086, 34.962162, -103.912155, 1, 0, 0, 0, 1, 0, 0, 0, 1),
     ["Topy Triệu Hồi Awakened Ho Lo Fish 200000kg"] = CFrame.new(160.55864, 42.8988914, 17476.1367, -1.1920929e-07, -0, -1.00000012, 0, 1, -0, 1.00000012, 0, -1.1920929e-07),
+    ["Samurai Lấy Cổ Kiếm Điếu Pháp"] = CFrame.new(302.358551, 55.9622536, 17379.4121, -6.1750412e-05, 0.33573842, 0.941955328, 1.06841326e-05, 0.941955268, -0.33573842, -1, -1.06841326e-05, -6.1750412e-05),
 }
 
 local function TeleportToNPC(name)
@@ -138,7 +139,8 @@ local npcs = {
     "ManaPotionSeller Mua Phục Hồi Mana",
     "NPC secret Lấy Độc Cô Cửu Điếu",
     "CharacterSecretLong lấy Hắc Long Thập Bát Điếu",
-    "Topy Triệu Hồi Awakened Ho Lo Fish 200000kg"   -- ← NPC mới được thêm
+    "Topy Triệu Hồi Awakened Ho Lo Fish 200000kg",
+    "Samurai Lấy Cổ Kiếm Điếu Pháp"
 }
 
 for _, name in ipairs(npcs) do

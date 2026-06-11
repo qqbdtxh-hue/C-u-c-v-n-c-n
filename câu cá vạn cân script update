@@ -1,10 +1,10 @@
--- // Fishing Million Pounds - Rayfield UI
--- Auto Rod + Nhiều NPC Mới + Map Tự Động
+-- // Fishing Million Script [Alpha] - Rayfield UI
+-- Auto Rod + Nhiều NPC + Xóa Blind Screen + Map Tự Động
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Fishing Million Pounds",
+    Name = "Fishing Million Script [Alpha]",
     LoadingTitle = "Loading...",
     LoadingSubtitle = "By Creator👑",
     ConfigurationSaving = { Enabled = false },
@@ -17,9 +17,12 @@ local MapFolder = workspace:WaitForChild("Map")
 
 local AutoRodEnabled = false
 local AutoRodLoop = nil
+local AntiBlindEnabled = false
+local heartbeatConn = nil
+local descendantConn = nil
 
 -- =============================================
--- TỌA ĐỘ NPC (Cũ + Mới)
+-- TỌA ĐỘ NPC
 -- =============================================
 local npcPositions = {
     ["Cơ Nhất Thiên Lấy Special Balt"] = CFrame.new(920.164856, 27.3165092, -13195.0449, 0, 0, 1, 0, 1, -0, -1, 0, 0),
@@ -28,8 +31,6 @@ local npcPositions = {
     ["ns5q5u Lấy Cấm Kỵ Điếu Pháp"] = CFrame.new(-14.3292389, 35.5106087, 53.3451958, 0.457574606, -0.281386137, 0.843473434, -3.13967466e-05, 0.948601127, 0.316474199, -0.889171243, -0.144837022, 0.434046984),
     ["babyboyofman1998 lấy Thuần Dương Điếu Pháp"] = CFrame.new(46.9793816, 64.9048615, -75.6301117, 0.97204423, -0.0477527827, 0.229890555, 0.0683596432, 0.994242072, -0.0825208798, -0.224626243, 0.0959291831, 0.969711602),
     ["Hien5ccc Lấy Lục Mạch Thần Điếu"] = CFrame.new(108.87339, 32.3300896, -21074.5879, -0.713147759, -0.0844456553, -0.695908904, 0.0993357599, 0.970527291, -0.219565943, 0.693939924, -0.225711599, -0.683740854),
-    
-    -- NPC MỚI
     ["Photuyoru Lấy Điếu Pháp Tăng Thiên Quốc"] = CFrame.new(55.7863388, 35.8780518, -5387.23535, -1.55330599e-05, 0.148344368, -0.988935769, 0.0106975203, -0.988879144, -0.148336053, -0.999942839, -0.0105814645, -0.00157155655),
     ["Prime Noobies Triệu Hồi Cá True Form Demo Fish"] = CFrame.new(-232.394348, 104.319763, -15746.8633, 0, 0, -1, 0, 1, 0, 1, 0, 0),
     ["Willer Johnathan Lấy Tiềm Long Điếu Pháp"] = CFrame.new(-35.8871574, 113.393326, -15692.3594, -1.00000024, 0, 0, 0, 0.866810441, -0.498637825, -0, -0.498637825, -0.86681056),
@@ -44,7 +45,7 @@ local npcPositions = {
     ["NPC secret Lấy Độc Cô Cửu Điếu"] = CFrame.new(160.157608, 50.7864532, -92.6125793, 0, 0, -1, 0, 1, 0, 1, 0, 0),
     ["CharacterSecretLong lấy Hắc Long Thập Bát Điếu"] = CFrame.new(9.39635086, 34.962162, -103.912155, 1, 0, 0, 0, 1, 0, 0, 0, 1),
     ["Topy Triệu Hồi Awakened Ho Lo Fish 200000kg"] = CFrame.new(160.55864, 42.8988914, 17476.1367, -1.1920929e-07, -0, -1.00000012, 0, 1, -0, 1.00000012, 0, -1.1920929e-07),
-    ["Samurai Lấy Cổ Kiếm Điếu Pháp"] = CFrame.new(302.358551, 55.9622536, 17379.4121, -6.1750412e-05, 0.33573842, 0.941955328, 1.06841326e-05, 0.941955268, -0.33573842, -1, -1.06841326e-05, -6.1750412e-05),
+    ["Samurai"] = CFrame.new(302.358551, 55.9622536, 17379.4121, -6.1750412e-05, 0.33573842, 0.941955328, 1.06841326e-05, 0.941955268, -0.33573842, -1, -1.06841326e-05, -6.1750412e-05),
 }
 
 local function TeleportToNPC(name)
@@ -82,6 +83,52 @@ local function StopAutoRod()
 end
 
 -- =============================================
+-- XÓA BLIND SCREEN (Toggle ON/OFF)
+-- =============================================
+local function DestroyBlindScreens()
+    for _, gui in ipairs(player.PlayerGui:GetDescendants()) do
+        if gui:IsA("GuiObject") or gui:IsA("ScreenGui") then
+            local name = gui.Name:lower()
+            if name == "blindscreen" or (name:find("blind") and name:find("screen")) then
+                gui:Destroy()
+            end
+        end
+    end
+end
+
+local function StartAntiBlind()
+    if AntiBlindEnabled then return end
+    AntiBlindEnabled = true
+
+    -- Xóa ngay lập tức
+    DestroyBlindScreens()
+
+    -- Xóa khi có GUI mới xuất hiện
+    descendantConn = player.PlayerGui.DescendantAdded:Connect(function(child)
+        task.defer(function()
+            local name = child.Name:lower()
+            if name == "blindscreen" or (name:find("blind") and name:find("screen")) then
+                child:Destroy()
+            end
+        end)
+    end)
+
+    -- Backup loop
+    heartbeatConn = game:GetService("RunService").Heartbeat:Connect(DestroyBlindScreens)
+    
+    Rayfield:Notify({Title = "Anti Blind", Content = "Đã BẬT Xóa Blind Screen (Hiển Thị Đỏ)", Duration = 4})
+end
+
+local function StopAntiBlind()
+    AntiBlindEnabled = false
+    if descendantConn then descendantConn:Disconnect() end
+    if heartbeatConn then heartbeatConn:Disconnect() end
+    descendantConn = nil
+    heartbeatConn = nil
+    Rayfield:Notify({Title = "Anti Blind", Content = "Đã TẮT Xóa Blind Screen", Duration = 4})
+end
+
+-- =============================================
 -- TẠO UI
 -- =============================================
 local Tab1 = Window:CreateTab("Mua Cần Câu", 4483362458)
@@ -103,15 +150,22 @@ TabAuto:CreateSection("Auto Câu Cá")
 TabAuto:CreateToggle({
     Name = "Bật/Tắt Auto Rod",
     CurrentValue = false,
-    Flag = "AutoRodToggle",
     Callback = function(Value)
         AutoRodEnabled = Value
+        if Value then StartAutoRod() else StopAutoRod() end
+    end,
+})
+
+local TabBlind = Window:CreateTab("Xóa Blind Screen", 4483362458)
+TabBlind:CreateSection("Xóa Hiển Thị Đỏ Cá")
+TabBlind:CreateToggle({
+    Name = "Bật/Tắt Xóa Blind Screen",
+    CurrentValue = false,
+    Callback = function(Value)
         if Value then
-            StartAutoRod()
-            Rayfield:Notify({Title = "Auto Rod", Content = "Đã BẬT Auto Rod (65/200)", Duration = 4})
+            StartAntiBlind()
         else
-            StopAutoRod()
-            Rayfield:Notify({Title = "Auto Rod", Content = "Đã TẮT Auto Rod", Duration = 4})
+            StopAntiBlind()
         end
     end,
 })
@@ -120,36 +174,19 @@ local Tab2 = Window:CreateTab("Dịch Chuyển NPC", 6026568198)
 Tab2:CreateSection("Danh sách NPC (Click để dịch chuyển)")
 
 local npcs = {
-    "Cơ Nhất Thiên Lấy Special Balt",
-    "Cii lấy Thái Cực Điếu Pháp",
-    "nick331k4ml lấy Dịch Kinh Thập Nhị Điếu",
-    "ns5q5u Lấy Cấm Kỵ Điếu Pháp",
-    "babyboyofman1998 lấy Thuần Dương Điếu Pháp",
-    "Hien5ccc Lấy Lục Mạch Thần Điếu",
-    "Photuyoru Lấy Điếu Pháp Tăng Thiên Quốc",
-    "Prime Noobies Triệu Hồi Cá True Form Demo Fish",
-    "Willer Johnathan Lấy Tiềm Long Điếu Pháp",
-    "Ngô Bất Nhân Lấy Trường Sinh Điếu Pháp",
-    "Sử Lương Hồ Lấy Định Hải Thần Điếu",
-    "Guy Lấy Ngũ Sát Điếu Pháp",
-    "Điếu Thứ Bất Lấy Đăng Tiên Thập Điếu",
-    "khoa_2011ko Lấy Thất Thương Điếu Pháp",
-    "cii_qo1471 Lấy Bắc Minh Điếu Pháp",
-    "Photuyoru Lấy Thục Đạo Sơn Điếu Pháp",
-    "ManaPotionSeller Mua Phục Hồi Mana",
-    "NPC secret Lấy Độc Cô Cửu Điếu",
-    "CharacterSecretLong lấy Hắc Long Thập Bát Điếu",
-    "Topy Triệu Hồi Awakened Ho Lo Fish 200000kg",
-    "Samurai Lấy Cổ Kiếm Điếu Pháp"
+    "Cơ Nhất Thiên Lấy Special Balt", "Cii lấy Thái Cực Điếu Pháp", "nick331k4ml lấy Dịch Kinh Thập Nhị Điếu",
+    "ns5q5u Lấy Cấm Kỵ Điếu Pháp", "babyboyofman1998 lấy Thuần Dương Điếu Pháp", "Hien5ccc Lấy Lục Mạch Thần Điếu",
+    "Photuyoru Lấy Điếu Pháp Tăng Thiên Quốc", "Prime Noobies Triệu Hồi Cá True Form Demo Fish",
+    "Willer Johnathan Lấy Tiềm Long Điếu Pháp", "Ngô Bất Nhân Lấy Trường Sinh Điếu Pháp",
+    "Sử Lương Hồ Lấy Định Hải Thần Điếu", "Guy Lấy Ngũ Sát Điếu Pháp",
+    "Điếu Thứ Bất Lấy Đăng Tiên Thập Điếu", "khoa_2011ko Lấy Thất Thương Điếu Pháp",
+    "cii_qo1471 Lấy Bắc Minh Điếu Pháp", "Photuyoru Lấy Thục Đạo Sơn Điếu Pháp",
+    "ManaPotionSeller Mua Phục Hồi Mana", "NPC secret Lấy Độc Cô Cửu Điếu",
+    "CharacterSecretLong lấy Hắc Long Thập Bát Điếu", "Topy Triệu Hồi Awakened Ho Lo Fish 200000kg", "Samurai"
 }
 
 for _, name in ipairs(npcs) do
-    Tab2:CreateButton({
-        Name = "→ " .. name,
-        Callback = function()
-            TeleportToNPC(name)
-        end,
-    })
+    Tab2:CreateButton({ Name = "→ " .. name, Callback = function() TeleportToNPC(name) end })
 end
 
 local Tab3 = Window:CreateTab("Bán Cá", 6023426915)
@@ -163,7 +200,6 @@ Tab3:CreateButton({
 
 local Tab4 = Window:CreateTab("TP Map", 4483362458)
 Tab4:CreateSection("Danh sách Map")
-
 for _, map in pairs(MapFolder:GetChildren()) do
     local mapNumber = tonumber(map.Name:match("%d+"))
     if mapNumber then
